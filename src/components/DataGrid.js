@@ -1,7 +1,12 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/prop-types */
 import React from 'react';
+import classnames from 'classnames';
 
-function DataGrid({ columns, rows }) {
+function DataGrid({ columns, rows, _manage, page, limit }) {
+  const isFirstPage = page.value === 0;
+  console.log({ isFirstPage });
   return (
     <>
       <div className="limiter">
@@ -22,7 +27,7 @@ function DataGrid({ columns, rows }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.length ? (
+                  {rows?.length ? (
                     rows.map((r, currentIndex) => (
                       <tr key={`data-grid-tr-${currentIndex}`}>
                         {columns.map((c) => {
@@ -36,12 +41,19 @@ function DataGrid({ columns, rows }) {
                                   <button
                                     type="button"
                                     className="btn btn-success btn-sm"
+                                    onClick={function () {
+                                      console.log({ r });
+                                      return _manage.edit(r);
+                                    }}
                                   >
                                     Edit
                                   </button>
                                   <button
                                     type="button"
                                     className="btn btn-danger btn-sm"
+                                    onClick={function () {
+                                      return _manage.delete(r.waiter_id);
+                                    }}
                                   >
                                     Del
                                   </button>
@@ -63,33 +75,30 @@ function DataGrid({ columns, rows }) {
       </div>
       <nav className="container-table100">
         <ul className="pagination">
-          <li className="page-item">
-            <a className="page-link" href="#">
-              Previous
-            </a>
+          <li
+            className={classnames('page-item ', {
+              disabled: isFirstPage,
+            })}
+            onClick={() => {
+              if (!isFirstPage) page.set((prev) => prev - 1);
+            }}
+          >
+            <a className="page-link">Previous</a>
           </li>
-          <li className="page-item">
-            <a className="page-link" href="#">
-              1
-            </a>
-          </li>
-          <li className="page-item">
-            <a className="page-link" href="#">
-              2
-            </a>
-          </li>
-          <li className="page-item">
-            <a className="page-link" href="#">
-              3
-            </a>
-          </li>
-          <li className="page-item">
-            <a className="page-link" href="#">
-              Next
-            </a>
+          <li className="page-item page-link">1</li>
+          <li className="page-item page-link">2</li>
+          <li className="page-item page-link">3</li>
+          <li
+            className="page-item page-link"
+            onClick={() => page.set((prev) => prev + 1)}
+          >
+            Next
           </li>
         </ul>
-        <select className="form-select ml-4 px-2">
+        <select
+          className="form-select ml-4 px-2"
+          onChange={(opt) => limit.set(opt.target.value)}
+        >
           <option value="5" selected>
             5
           </option>

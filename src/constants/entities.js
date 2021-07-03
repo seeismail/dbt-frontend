@@ -1,11 +1,11 @@
 export const waiters = {
   key: 'waiters',
   columns: [
-    { server: 'waiterId', client: 'Waiter ID' },
+    { server: 'waiter_id', client: 'Waiter ID' },
     { server: 'name', client: 'Name' },
-    { server: 'contact', client: 'Contact' },
+    { server: 'phone', client: 'Contact' },
     { server: 'salary', client: 'Salary' },
-    { server: 'hire_Date', client: 'Hiring Date' },
+    { server: 'hire_date', client: 'Hiring Date' },
     { client: 'Manage' },
   ],
 };
