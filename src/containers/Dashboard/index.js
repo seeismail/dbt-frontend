@@ -3,7 +3,7 @@ import axios from 'axios';
 import Statistics from './statistics';
 
 const api = axios.create({
-  baseURL: 'http://192.168.112.1:8000',
+  baseURL: 'http://localhost:8000',
 });
 
 function Dashboard() {
@@ -12,8 +12,8 @@ function Dashboard() {
   api
     .get('/waiters', { params: { limit: 2, page: 0 } })
     .then(function (result) {
-      console.log({ result });
       setWaiters(result);
+      console.log({ waiters });
     })
     .catch(function (error) {
       console.log({ error });
