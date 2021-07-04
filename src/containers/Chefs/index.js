@@ -12,26 +12,9 @@ import DataGrid from '../../components/DataGrid';
 import { chefs as chefsEntity } from '../../constants/entities';
 import { chefSchema } from '../../constants/schema';
 import Modal from './Modal';
-import { api } from '../../constants/server';
+import { api, fetchChefs } from '../../constants/server';
 
-const fetchRows = (page, limit, query) =>
-  api
-    .get('/cheffs', {
-      params: { limit, page, q: query },
-    })
-    .then((result) => {
-      // debugger;
-      const v = '';
-      return {
-        ...result.data,
-        rows: result.data.rows.map((row) => {
-          const parsedDate = dayjs(row.hire_date).format('DD MMM YYYY');
-          return { ...row, hire_date: parsedDate };
-        }),
-      };
-    });
-
-function Chefs() {
+function Orders() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -45,7 +28,7 @@ function Chefs() {
 
   const { data, isLoading: isLoadingQuery, isError, error } = useQuery(
     ['chefs', page, limit, query],
-    () => fetchRows(page, limit, query),
+    () => fetchChefs(page, limit, query),
     { retry: false }
   );
 
@@ -161,7 +144,6 @@ function Chefs() {
         limit={{ value: limit, set: setLimit }}
         _manage={{ edit: handleEdit, delete: handleDelete }}
       />
-
       <Modal
         toggle={toggleModal}
         isModalOpen={isModalOpen}
@@ -178,4 +160,4 @@ function Chefs() {
   );
 }
 
-export default Chefs;
+export default Orders;

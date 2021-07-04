@@ -9,27 +9,10 @@ import dayjs from 'dayjs';
 import { useToasts } from 'react-toast-notifications';
 import { useQuery, useQueryClient } from 'react-query';
 import DataGrid from '../../components/DataGrid';
-import { chefs as chefsEntity } from '../../constants/entities';
+import { meals as mealsEntity } from '../../constants/entities';
 import { mealSchema } from '../../constants/schema';
 import Modal from './Modal';
-import { api } from '../../constants/server';
-
-const fetchRows = (page, limit, query) =>
-  api
-    .get('/meals', {
-      params: { limit, page, q: query },
-    })
-    .then((result) => {
-      // debugger;
-      const v = '';
-      return {
-        ...result.data,
-        rows: result.data.rows.map((row) => {
-          const parsedDate = dayjs(row.hire_date).format('DD MMM YYYY');
-          return { ...row, hire_date: parsedDate };
-        }),
-      };
-    });
+import { api, fetchChefs, fetchMeals } from '../../constants/server';
 
 function Meal() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,18 +28,15 @@ function Meal() {
 
   const { data, isLoading: isLoadingQuery, isError, error } = useQuery(
     ['meals', page, limit, query],
-    () => fetchRows(page, limit, query),
+    () => fetchMeals(page, limit, query),
     { retry: false }
   );
 
   const handleSubmit = async (values, form) => {
     setIsLoading(true);
     try {
-      const parsedDate = dayjs(values.hire_date).format('YYYY-MM-DD');
-      const chef = { ...values, hire_date: parsedDate };
-
-      if (editId) await api.patch(`/meals/${editId}`, chef);
-      else await api.post('/meals', chef);
+      if (editId) await api.patch(`/meals/${editId}`, values);
+      else await api.post('/meals', values);
 
       await queryClient.invalidateQueries();
 
@@ -74,7 +54,7 @@ function Meal() {
 
   const formik = useFormik({
     initialValues: {
-      name: '',
+      meal_name: '',
       price: '',
       cheff_id: '',
     },
@@ -95,6 +75,8 @@ function Meal() {
     onSubmit: handleSubmit,
   });
 
+  console.log({ values: formik.values });
+
   const toggleModal = () => {
     if (!isLoading) {
       if (isModalOpen) formik.resetForm();
@@ -103,11 +85,17 @@ function Meal() {
   };
 
   const handleEdit = (selectedMeal) => {
-    const { name, price, meal_id: id } = selectedMeal;
+    const {
+      meal_name: name,
+      price,
+      meal_id: id,
+      cheff_id: chefId,
+    } = selectedMeal;
 
     // update the form values in modal
-    formik.setFieldValue('name', name);
+    formik.setFieldValue('meal_name', name);
     formik.setFieldValue('price', price);
+    formik.setFieldValue('cheff_id', chefId);
 
     // understand that save will trigger PATCH req
     setEditId(id);
@@ -145,7 +133,7 @@ function Meal() {
       </div>
       <p className="text-center">{isLoadingQuery && 'Loading...'}</p>
       <DataGrid
-        columns={chefsEntity.columns}
+        columns={mealsEntity.columns}
         rows={data?.rows}
         pages={data?.pages ?? 1}
         page={{ value: page, set: setPage }}

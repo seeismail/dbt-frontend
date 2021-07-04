@@ -48,16 +48,11 @@ function Waiters() {
     { retry: false }
   );
 
-  const waiters = useQuery('waiters', () => fetchWaiters(1, 100, ''));
-
   const handleSubmit = async (values, form) => {
     setIsLoading(true);
     try {
-      const parsedDate = dayjs(values.hire_date).format('YYYY-MM-DD');
-      const customer = { ...values, hire_date: parsedDate };
-
-      if (editId) await api.patch(`/customers/${editId}`, customer);
-      else await api.post('/customers', customer);
+      if (editId) await api.patch(`/customers/${editId}`, values);
+      else await api.post('/customers', values);
 
       await queryClient.invalidateQueries();
 
@@ -78,7 +73,6 @@ function Waiters() {
       name: '',
       phone: '',
       address: '',
-      waiter_id: '',
     },
     validateOnMount: false,
     validateOnBlur: false,
@@ -105,22 +99,12 @@ function Waiters() {
   };
 
   const handleEdit = async (selectedCustomer) => {
-    const {
-      name,
-      phone,
-      address,
-      waiter_id: waiterId,
-      customer_id: id,
-    } = selectedCustomer;
+    const { name, phone, address, customer_id: id } = selectedCustomer;
 
     // update the form values in modal
     formik.setFieldValue('name', name);
     formik.setFieldValue('phone', phone);
     formik.setFieldValue('address', address);
-
-    const waiterName = waiters.data.rows.find((r) => r.waiter_id === waiterId);
-
-    formik.setFieldValue('waiter_id', waiterName);
 
     // understand that save will trigger PATCH req
     setEditId(id);
@@ -170,7 +154,6 @@ function Waiters() {
         toggle={toggleModal}
         isModalOpen={isModalOpen}
         isSaving={isLoading}
-        isEditing={editId}
         formik={{
           handleChange: formik.handleChange,
           handleSubmit: formik.handleSubmit,

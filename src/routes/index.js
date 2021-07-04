@@ -8,6 +8,7 @@ const Waiters = React.lazy(() => import('../containers/Waiters'));
 const Customers = React.lazy(() => import('../containers/Customers'));
 const Orders = React.lazy(() => import('../containers/Orders'));
 const Profile = React.lazy(() => import('../containers/Profile'));
+const Meals = React.lazy(() => import('../containers/Meals'));
 
 export const sidebarRoutes = [
   {
@@ -40,6 +41,7 @@ export const sidebarRoutes = [
     component: Orders,
     title: 'Orders',
   },
+  { path: '/meals', component: Meals, title: 'Meals' },
 ];
 
 export const hiddenRoutes = [

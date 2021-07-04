@@ -1,10 +1,19 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/prop-types */
 import React from 'react';
 import Pagination from './Pagination';
 
-function DataGrid({ columns, rows, _manage, page, pages, limit }) {
+function DataGrid({
+  columns,
+  rows,
+  _manage,
+  page,
+  pages,
+  limit,
+  _custom: CustomRenderer,
+}) {
   return (
     <>
       <div className="limiter">
@@ -36,22 +45,53 @@ function DataGrid({ columns, rows, _manage, page, pages, limit }) {
                                 cellFromServer
                               ) : (
                                 <div className="btn-group" role="group">
-                                  <button
-                                    type="button"
-                                    className="btn btn-success btn-sm"
-                                    onClick={() => _manage.edit(r)}
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="btn btn-danger btn-sm"
-                                    onClick={() =>
-                                      _manage.delete(r[columns[0].server])
-                                    }
-                                  >
-                                    Del
-                                  </button>
+                                  {c.client == 'Add' ? (
+                                    CustomRenderer ? (
+                                      <CustomRenderer meal={r} />
+                                    ) : null
+                                  ) : c.client == 'Handle' ? (
+                                    <>
+                                      <button
+                                        type="button"
+                                        className="btn btn-danger btn-sm"
+                                        onClick={() =>
+                                          _manage.decrement(r.meal_id)
+                                        }
+                                      >
+                                        -
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="btn btn-success btn-sm"
+                                        onClick={() =>
+                                          _manage.increment(r.meal_id)
+                                        }
+                                      >
+                                        +
+                                      </button>
+                                    </>
+                                  ) : c.client == 'Qty' ? (
+                                    r.quantity
+                                  ) : (
+                                    <>
+                                      <button
+                                        type="button"
+                                        className="btn btn-success btn-sm"
+                                        onClick={() => _manage.edit(r)}
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="btn btn-danger btn-sm"
+                                        onClick={() =>
+                                          _manage.delete(r[columns[0].server])
+                                        }
+                                      >
+                                        Del
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               )}
                             </td>

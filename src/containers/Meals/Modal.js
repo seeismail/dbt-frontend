@@ -1,11 +1,9 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/prop-types */
 import Modal from 'react-modal';
-
-import React from 'react';
-import DatePicker from 'react-datepicker';
-import dayjs from 'dayjs';
-import { api } from '../../constants/server';
+import React, { useEffect } from 'react';
+import { useQuery } from 'react-query';
+import { fetchChefs } from '../../constants/server';
 
 Modal.setAppElement('#root');
 
@@ -20,7 +18,29 @@ const customStyles = {
   },
 };
 
+const getDefaultChef = (chefs, id) => {
+  if (!chefs) return;
+
+  const chef = chefs.find((c) => c.cheff_id === id);
+
+  if (!chef) return;
+
+  const defaultValue = {
+    name: chef.name,
+    id: chef.cheff_id,
+  };
+
+  return JSON.stringify(defaultValue);
+};
+
 function WaitersModal({ toggle, isModalOpen, formik, isSaving }) {
+  const chefs = useQuery('chefs', () => fetchChefs(1, 100, ''));
+
+  useEffect(() => {
+    if (isModalOpen)
+      formik.setFieldValue('cheff_id', chefs.data?.rows?.length ? 1 : '');
+  }, [isModalOpen]);
+
   return (
     <Modal
       isOpen={isModalOpen}
@@ -29,55 +49,61 @@ function WaitersModal({ toggle, isModalOpen, formik, isSaving }) {
       style={customStyles}
       // contentLabel="Example Modal"
     >
-      <h2>Add Chef</h2>
+      <h2>Add Meal</h2>
       <form onSubmit={formik.handleSubmit}>
         <div className="input-group my-4">
           <input
-            id="name"
+            id="meal_name"
             type="text"
             className="form-control"
             placeholder="Name"
             aria-label="Name"
-            value={formik.values.name}
+            value={formik.values.meal_name}
             onChange={formik.handleChange}
           />
         </div>
 
         <div className="input-group my-4">
           <input
-            id="phone"
+            id="price"
             type="text"
             className="form-control"
-            placeholder="Phone"
-            aria-label="Phone"
-            value={formik.values.phone}
+            placeholder="Price"
+            aria-label="Price"
+            value={formik.values.price}
             onChange={formik.handleChange}
           />
         </div>
 
-        <div className="input-group my-4">
-          <input
-            id="salary"
-            type="text"
-            className="form-control"
-            placeholder="Salary"
-            aria-label="Salary"
-            value={formik.values.salary}
-            onChange={formik.handleChange}
-          />
-        </div>
-
-        <div
-          className="input-group my-4 d-flex flex-col align-items-start justify-content-start"
-          style={{ padding: '12px', width: '100%' }}
-        >
-          <label htmlFor="hire_date">Hiring Date</label>
-          <div className="form-control" style={{ width: '100%' }}>
-            <DatePicker
-              id="hire_date"
-              selected={formik.values.hire_date}
-              onChange={(date) => formik.setFieldValue('hire_date', date)}
-            />
+        <div className="input-group my-4 ml-2 d-flex flex-col align-items-start justify-content-start">
+          <label htmlFor="waiter_id">Chef</label>
+          <div>
+            <select
+              className="form-select py-2"
+              defaultValue={getDefaultChef(
+                chefs.data?.rows,
+                formik.values.cheff_id
+              )}
+              onChange={(event) => {
+                event.preventDefault();
+                const value = JSON.parse(event.target.value);
+                formik.setFieldValue('cheff_id', value.id);
+              }}
+            >
+              {chefs?.data?.rows?.map((row) => (
+                <option
+                  selected={chefs.data.rows.includes(
+                    (r) => r.cheff_id === row.cheff_id
+                  )}
+                  value={JSON.stringify({
+                    name: row.name,
+                    id: row.cheff_id,
+                  })}
+                >
+                  {row.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

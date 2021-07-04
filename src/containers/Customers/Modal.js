@@ -19,10 +19,7 @@ const customStyles = {
   },
 };
 
-function CustomersModal({ toggle, isModalOpen, formik, isSaving, isEditing }) {
-  console.log({ values: formik.values });
-  const waiters = useQuery('waiters', () => fetchWaiters(1, 100, ''));
-
+function CustomersModal({ toggle, isModalOpen, formik, isSaving }) {
   return (
     <Modal
       isOpen={isModalOpen}
@@ -68,32 +65,6 @@ function CustomersModal({ toggle, isModalOpen, formik, isSaving, isEditing }) {
             onChange={formik.handleChange}
           />
         </div>
-
-        {!isEditing && (
-          <div className="input-group my-4 ml-2 d-flex flex-col align-items-start justify-content-start">
-            <label htmlFor="waiter_id">Waiter</label>
-            <div>
-              <select
-                className="form-select py-2"
-                onChange={(waiter) => {
-                  const value = JSON.parse(waiter.target.value);
-                  formik.setFieldValue('waiter_id', value.id);
-                }}
-              >
-                {waiters?.data?.rows?.map((row) => (
-                  <option
-                    value={JSON.stringify({
-                      name: row.name,
-                      id: row.waiter_id,
-                    })}
-                  >
-                    {row.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
 
         {Object.values(formik.errors).map((err) => (
           <p className="text-danger">{err}</p>

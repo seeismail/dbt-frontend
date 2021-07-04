@@ -26,16 +26,36 @@ export const customers = {
     { server: 'name', client: 'Name' },
     { server: 'phone', client: 'Phone' },
     { server: 'address', client: 'Address' },
-    { server: 'waiter_id', client: 'Waiter' },
     { client: 'Manage' },
   ],
 };
 export const meals = {
   key: 'meals',
   columns: [
-    { server: 'mId', client: 'Meal ID' },
-    { server: 'name', client: 'Name' },
+    { server: 'meal_id', client: 'Meal ID' },
+    { server: 'meal_name', client: 'Name' },
     { server: 'price', client: 'Price' },
+    // { server: 'cheff_id', client: 'Chef ID' },
+    { client: 'Manage' },
+  ],
+};
+export const addMeal = {
+  key: 'meals',
+  columns: [
+    { server: 'meal_id', client: 'Meal ID' },
+    { server: 'meal_name', client: 'Name' },
+    { server: 'price', client: 'Price' },
+    { client: 'Add' },
+  ],
+};
+export const currentOrder = {
+  key: 'meals',
+  columns: [
+    { server: 'meal_id', client: 'Meal ID' },
+    { server: 'meal_name', client: 'Name' },
+    { server: 'price', client: 'Price' },
+    { client: 'Qty' },
+    { client: 'Handle' },
   ],
 };
 export const orders = {
