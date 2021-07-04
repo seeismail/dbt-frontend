@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../table_tamplate/css/main.css';
 import '../../table_tamplate/css/util.css';
 
@@ -9,29 +9,28 @@ import dayjs from 'dayjs';
 import { useToasts } from 'react-toast-notifications';
 import { useQuery, useQueryClient } from 'react-query';
 import DataGrid from '../../components/DataGrid';
-import { chefs as chefsEntity } from '../../constants/entities';
-import { chefSchema } from '../../constants/schema';
+import { customers as customersEntity } from '../../constants/entities';
+import { customerSchema } from '../../constants/schema';
 import Modal from './Modal';
-import { api } from '../../constants/server';
+import { api, fetchWaiters } from '../../constants/server';
 
 const fetchRows = (page, limit, query) =>
   api
-    .get('/cheffs', {
+    .get('/customers', {
       params: { limit, page, q: query },
     })
-    .then((result) => {
+    .then((result) =>
       // debugger;
-      const v = '';
-      return {
+      ({
         ...result.data,
         rows: result.data.rows.map((row) => {
           const parsedDate = dayjs(row.hire_date).format('DD MMM YYYY');
           return { ...row, hire_date: parsedDate };
         }),
-      };
-    });
+      })
+    );
 
-function Chefs() {
+function Waiters() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -44,19 +43,21 @@ function Chefs() {
   const [query, setQuery] = useState('');
 
   const { data, isLoading: isLoadingQuery, isError, error } = useQuery(
-    ['chefs', page, limit, query],
+    ['customers', page, limit, query],
     () => fetchRows(page, limit, query),
     { retry: false }
   );
+
+  const waiters = useQuery('waiters', () => fetchWaiters(1, 100, ''));
 
   const handleSubmit = async (values, form) => {
     setIsLoading(true);
     try {
       const parsedDate = dayjs(values.hire_date).format('YYYY-MM-DD');
-      const chef = { ...values, hire_date: parsedDate };
+      const customer = { ...values, hire_date: parsedDate };
 
-      if (editId) await api.patch(`/cheffs/${editId}`, chef);
-      else await api.post('/cheffs', chef);
+      if (editId) await api.patch(`/customers/${editId}`, customer);
+      else await api.post('/customers', customer);
 
       await queryClient.invalidateQueries();
 
@@ -65,7 +66,7 @@ function Chefs() {
       form.resetForm();
       toggleModal();
 
-      addToast('Chef dispatched succesfully', { appearance: 'success' });
+      addToast('Customer dispatched succesfully', { appearance: 'success' });
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
     }
@@ -76,8 +77,8 @@ function Chefs() {
     initialValues: {
       name: '',
       phone: '',
-      salary: '',
-      hire_date: new Date(),
+      address: '',
+      waiter_id: '',
     },
     validateOnMount: false,
     validateOnBlur: false,
@@ -86,7 +87,7 @@ function Chefs() {
       const errors = {};
       Object.entries(values).forEach((elem) => {
         const [key, value] = elem;
-        const validation = chefSchema[key]?.validate(value);
+        const validation = customerSchema[key]?.validate(value);
         if (validation?.error)
           errors[key] = validation.error.details[0].message;
       });
@@ -103,20 +104,23 @@ function Chefs() {
     }
   };
 
-  const handleEdit = (selectedWaiter) => {
+  const handleEdit = async (selectedCustomer) => {
     const {
       name,
       phone,
-      salary,
-      hire_date: date,
-      waiter_id: id,
-    } = selectedWaiter;
+      address,
+      waiter_id: waiterId,
+      customer_id: id,
+    } = selectedCustomer;
 
     // update the form values in modal
     formik.setFieldValue('name', name);
     formik.setFieldValue('phone', phone);
-    formik.setFieldValue('salary', salary);
-    formik.setFieldValue('hire_date', dayjs(date, 'DD MMM YYYY').toDate());
+    formik.setFieldValue('address', address);
+
+    const waiterName = waiters.data.rows.find((r) => r.waiter_id === waiterId);
+
+    formik.setFieldValue('waiter_id', waiterName);
 
     // understand that save will trigger PATCH req
     setEditId(id);
@@ -126,9 +130,9 @@ function Chefs() {
   };
 
   const handleDelete = async (id) => {
-    await api.delete(`/cheffs/${id}`);
+    await api.delete(`/customers/${id}`);
     await await queryClient.invalidateQueries();
-    addToast('Waiter deleted successfully', { appearance: 'success' });
+    addToast('Customer deleted successfully', { appearance: 'success' });
   };
 
   useEffect(() => {
@@ -143,7 +147,7 @@ function Chefs() {
           className="btn btn-primary mb-2"
           onClick={toggleModal}
         >
-          Add Chef
+          Add Customer
         </button>
         <input
           placeholder="Search"
@@ -154,7 +158,7 @@ function Chefs() {
       </div>
       <p className="text-center">{isLoadingQuery && 'Loading...'}</p>
       <DataGrid
-        columns={chefsEntity.columns}
+        columns={customersEntity.columns}
         rows={data?.rows}
         pages={data?.pages ?? 1}
         page={{ value: page, set: setPage }}
@@ -166,6 +170,7 @@ function Chefs() {
         toggle={toggleModal}
         isModalOpen={isModalOpen}
         isSaving={isLoading}
+        isEditing={editId}
         formik={{
           handleChange: formik.handleChange,
           handleSubmit: formik.handleSubmit,
@@ -178,4 +183,4 @@ function Chefs() {
   );
 }
 
-export default Chefs;
+export default Waiters;

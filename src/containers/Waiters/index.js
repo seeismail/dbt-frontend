@@ -11,27 +11,15 @@ import { useQuery, useQueryClient } from 'react-query';
 import DataGrid from '../../components/DataGrid';
 import { waiters as waitersEntity } from '../../constants/entities';
 import { waiterSchema } from '../../constants/schema';
-import WaitersModal from './WaitersModal';
-import { api } from '../../constants/server';
-
-const fetchWaiters = (page, limit, query) =>
-  api
-    .get('/waiters', {
-      params: { limit, page, q: query },
-    })
-    .then((result) =>
-      result.data.map((row) => {
-        const parsedDate = dayjs(row.hire_date).format('DD MMM YYYY');
-        return { ...row, hire_date: parsedDate };
-      })
-    );
+import Modal from './Modal';
+import { api, fetchWaiters } from '../../constants/server';
 
 function Waiters() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editWaiterId, setEditWaiterId] = useState(null);
   const { addToast } = useToasts();
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
 
   const queryClient = useQueryClient();
@@ -40,7 +28,8 @@ function Waiters() {
 
   const { data, isLoading: isLoadingQuery, isError, error } = useQuery(
     ['waiters', page, limit, query],
-    () => fetchWaiters(page, limit, query)
+    () => fetchWaiters(page, limit, query),
+    { retry: false }
   );
 
   const handleSubmit = async (values, form) => {
@@ -97,7 +86,7 @@ function Waiters() {
     }
   };
 
-  const handleEditWaiter = (selectedWaiter) => {
+  const handleEdit = (selectedWaiter) => {
     const {
       name,
       phone,
@@ -119,11 +108,15 @@ function Waiters() {
     toggleModal();
   };
 
-  const handleDeleteWaiter = async (id) => {
+  const handleDelete = async (id) => {
     await api.delete(`/waiters/${id}`);
     await await queryClient.invalidateQueries();
     addToast('Waiter deleted successfully', { appearance: 'success' });
   };
+
+  useEffect(() => {
+    if (isError) addToast(error.message, { appearance: 'error' });
+  }, [isError]);
 
   return (
     <div className="container-padding">
@@ -145,13 +138,14 @@ function Waiters() {
       <p className="text-center">{isLoadingQuery && 'Loading...'}</p>
       <DataGrid
         columns={waitersEntity.columns}
-        rows={data}
+        rows={data?.rows}
+        pages={data?.pages ?? 1}
         page={{ value: page, set: setPage }}
         limit={{ value: limit, set: setLimit }}
-        _manage={{ edit: handleEditWaiter, delete: handleDeleteWaiter }}
+        _manage={{ edit: handleEdit, delete: handleDelete }}
       />
 
-      <WaitersModal
+      <Modal
         toggle={toggleModal}
         isModalOpen={isModalOpen}
         isSaving={isLoading}
@@ -162,7 +156,6 @@ function Waiters() {
           setFieldValue: formik.setFieldValue,
           errors: formik.errors,
         }}
-        errors={formik.errors}
       />
     </div>
   );

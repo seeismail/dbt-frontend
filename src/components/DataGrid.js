@@ -2,11 +2,9 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/prop-types */
 import React from 'react';
-import classnames from 'classnames';
+import Pagination from './Pagination';
 
-function DataGrid({ columns, rows, _manage, page, limit }) {
-  const isFirstPage = page.value === 0;
-  console.log({ isFirstPage });
+function DataGrid({ columns, rows, _manage, page, pages, limit }) {
   return (
     <>
       <div className="limiter">
@@ -41,19 +39,16 @@ function DataGrid({ columns, rows, _manage, page, limit }) {
                                   <button
                                     type="button"
                                     className="btn btn-success btn-sm"
-                                    onClick={function () {
-                                      console.log({ r });
-                                      return _manage.edit(r);
-                                    }}
+                                    onClick={() => _manage.edit(r)}
                                   >
                                     Edit
                                   </button>
                                   <button
                                     type="button"
                                     className="btn btn-danger btn-sm"
-                                    onClick={function () {
-                                      return _manage.delete(r.waiter_id);
-                                    }}
+                                    onClick={() =>
+                                      _manage.delete(r[columns[0].server])
+                                    }
                                   >
                                     Del
                                   </button>
@@ -70,42 +65,10 @@ function DataGrid({ columns, rows, _manage, page, limit }) {
                 </tbody>
               </table>
             </div>
+            <Pagination limit={limit} page={page} pages={pages} />
           </div>
         </div>
       </div>
-      <nav className="container-table100">
-        <ul className="pagination">
-          <li
-            className={classnames('page-item ', {
-              disabled: isFirstPage,
-            })}
-            onClick={() => {
-              if (!isFirstPage) page.set((prev) => prev - 1);
-            }}
-          >
-            <a className="page-link">Previous</a>
-          </li>
-          <li className="page-item page-link">1</li>
-          <li className="page-item page-link">2</li>
-          <li className="page-item page-link">3</li>
-          <li
-            className="page-item page-link"
-            onClick={() => page.set((prev) => prev + 1)}
-          >
-            Next
-          </li>
-        </ul>
-        <select
-          className="form-select ml-4 px-2"
-          onChange={(opt) => limit.set(opt.target.value)}
-        >
-          <option value="5" selected>
-            5
-          </option>
-          <option value="10">10</option>
-          <option value="25">25</option>
-        </select>
-      </nav>
     </>
   );
 }

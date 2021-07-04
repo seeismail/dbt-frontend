@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../table_tamplate/css/main.css';
 import '../../table_tamplate/css/util.css';
 
@@ -10,13 +10,13 @@ import { useToasts } from 'react-toast-notifications';
 import { useQuery, useQueryClient } from 'react-query';
 import DataGrid from '../../components/DataGrid';
 import { chefs as chefsEntity } from '../../constants/entities';
-import { chefSchema } from '../../constants/schema';
+import { mealSchema } from '../../constants/schema';
 import Modal from './Modal';
 import { api } from '../../constants/server';
 
 const fetchRows = (page, limit, query) =>
   api
-    .get('/cheffs', {
+    .get('/meals', {
       params: { limit, page, q: query },
     })
     .then((result) => {
@@ -31,7 +31,7 @@ const fetchRows = (page, limit, query) =>
       };
     });
 
-function Chefs() {
+function Meal() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -44,7 +44,7 @@ function Chefs() {
   const [query, setQuery] = useState('');
 
   const { data, isLoading: isLoadingQuery, isError, error } = useQuery(
-    ['chefs', page, limit, query],
+    ['meals', page, limit, query],
     () => fetchRows(page, limit, query),
     { retry: false }
   );
@@ -55,8 +55,8 @@ function Chefs() {
       const parsedDate = dayjs(values.hire_date).format('YYYY-MM-DD');
       const chef = { ...values, hire_date: parsedDate };
 
-      if (editId) await api.patch(`/cheffs/${editId}`, chef);
-      else await api.post('/cheffs', chef);
+      if (editId) await api.patch(`/meals/${editId}`, chef);
+      else await api.post('/meals', chef);
 
       await queryClient.invalidateQueries();
 
@@ -65,7 +65,7 @@ function Chefs() {
       form.resetForm();
       toggleModal();
 
-      addToast('Chef dispatched succesfully', { appearance: 'success' });
+      addToast('Meal dispatched succesfully', { appearance: 'success' });
     } catch (err) {
       addToast(err.message, { appearance: 'error' });
     }
@@ -75,9 +75,8 @@ function Chefs() {
   const formik = useFormik({
     initialValues: {
       name: '',
-      phone: '',
-      salary: '',
-      hire_date: new Date(),
+      price: '',
+      cheff_id: '',
     },
     validateOnMount: false,
     validateOnBlur: false,
@@ -86,7 +85,7 @@ function Chefs() {
       const errors = {};
       Object.entries(values).forEach((elem) => {
         const [key, value] = elem;
-        const validation = chefSchema[key]?.validate(value);
+        const validation = mealSchema[key]?.validate(value);
         if (validation?.error)
           errors[key] = validation.error.details[0].message;
       });
@@ -103,20 +102,12 @@ function Chefs() {
     }
   };
 
-  const handleEdit = (selectedWaiter) => {
-    const {
-      name,
-      phone,
-      salary,
-      hire_date: date,
-      waiter_id: id,
-    } = selectedWaiter;
+  const handleEdit = (selectedMeal) => {
+    const { name, price, meal_id: id } = selectedMeal;
 
     // update the form values in modal
     formik.setFieldValue('name', name);
-    formik.setFieldValue('phone', phone);
-    formik.setFieldValue('salary', salary);
-    formik.setFieldValue('hire_date', dayjs(date, 'DD MMM YYYY').toDate());
+    formik.setFieldValue('price', price);
 
     // understand that save will trigger PATCH req
     setEditId(id);
@@ -126,9 +117,9 @@ function Chefs() {
   };
 
   const handleDelete = async (id) => {
-    await api.delete(`/cheffs/${id}`);
+    await api.delete(`/meals/${id}`);
     await await queryClient.invalidateQueries();
-    addToast('Waiter deleted successfully', { appearance: 'success' });
+    addToast('Meal deleted successfully', { appearance: 'success' });
   };
 
   useEffect(() => {
@@ -143,7 +134,7 @@ function Chefs() {
           className="btn btn-primary mb-2"
           onClick={toggleModal}
         >
-          Add Chef
+          Add Meal
         </button>
         <input
           placeholder="Search"
@@ -178,4 +169,4 @@ function Chefs() {
   );
 }
 
-export default Chefs;
+export default Meal;
