@@ -109,9 +109,14 @@ function Waiters() {
   };
 
   const handleDelete = async (id) => {
-    await api.delete(`/waiters/${id}`);
-    await await queryClient.invalidateQueries();
-    addToast('Waiter deleted successfully', { appearance: 'success' });
+    try {
+      await api.delete(`/waiters/${id}`);
+      await await queryClient.invalidateQueries();
+      addToast('Waiter deleted successfully', { appearance: 'success' });
+    } catch (err) {
+      const error = error.response?.data?.message ?? err.message;
+      addToast(error, { appearance: 'error' });
+    }
   };
 
   useEffect(() => {
@@ -119,23 +124,23 @@ function Waiters() {
   }, [isError]);
 
   return (
-    <div className="container-padding">
-      <div className="d-flex justify-content-between">
+    <div className='container-padding'>
+      <div className='d-flex justify-content-between'>
         <button
-          type="button"
-          className="btn btn-primary mb-2"
+          type='button'
+          className='btn btn-primary mb-2'
           onClick={toggleModal}
         >
           Add Waiter
         </button>
         <input
-          placeholder="Search"
-          className="pl-2"
+          placeholder='Search'
+          className='pl-2'
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
-      <p className="text-center">{isLoadingQuery && 'Loading...'}</p>
+      <p className='text-center'>{isLoadingQuery && 'Loading...'}</p>
       <DataGrid
         columns={waitersEntity.columns}
         rows={data?.rows}

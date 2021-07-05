@@ -38,7 +38,8 @@ function WaitersModal({ toggle, isModalOpen, formik, isSaving }) {
 
   useEffect(() => {
     if (isModalOpen)
-      formik.setFieldValue('cheff_id', chefs.data?.rows?.length ? 1 : '');
+      if (formik.values.cheff_id === '')
+        formik.setFieldValue('cheff_id', chefs.data.rows[0].cheff_id);
   }, [isModalOpen]);
 
   return (
@@ -51,35 +52,35 @@ function WaitersModal({ toggle, isModalOpen, formik, isSaving }) {
     >
       <h2>Add Meal</h2>
       <form onSubmit={formik.handleSubmit}>
-        <div className="input-group my-4">
+        <div className='input-group my-4'>
           <input
-            id="meal_name"
-            type="text"
-            className="form-control"
-            placeholder="Name"
-            aria-label="Name"
+            id='meal_name'
+            type='text'
+            className='form-control'
+            placeholder='Name'
+            aria-label='Name'
             value={formik.values.meal_name}
             onChange={formik.handleChange}
           />
         </div>
 
-        <div className="input-group my-4">
+        <div className='input-group my-4'>
           <input
-            id="price"
-            type="text"
-            className="form-control"
-            placeholder="Price"
-            aria-label="Price"
+            id='price'
+            type='text'
+            className='form-control'
+            placeholder='Price'
+            aria-label='Price'
             value={formik.values.price}
             onChange={formik.handleChange}
           />
         </div>
 
-        <div className="input-group my-4 ml-2 d-flex flex-col align-items-start justify-content-start">
-          <label htmlFor="waiter_id">Chef</label>
+        <div className='input-group my-4 ml-2 d-flex flex-col align-items-start justify-content-start'>
+          <label htmlFor='waiter_id'>Chef</label>
           <div>
             <select
-              className="form-select py-2"
+              className='form-select py-2'
               defaultValue={getDefaultChef(
                 chefs.data?.rows,
                 formik.values.cheff_id
@@ -108,19 +109,19 @@ function WaitersModal({ toggle, isModalOpen, formik, isSaving }) {
         </div>
 
         {Object.values(formik.errors).map((err) => (
-          <p className="text-danger">{err}</p>
+          <p className='text-danger'>{err}</p>
         ))}
 
-        <div className="d-flex justify-content-end mt-3">
-          <div className="btn-group" role="group">
+        <div className='d-flex justify-content-end mt-3'>
+          <div className='btn-group' role='group'>
             <button
-              type="button"
-              className="btn btn-secondary"
+              type='button'
+              className='btn btn-secondary'
               onClick={toggle}
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-success">
+            <button type='submit' className='btn btn-success'>
               {isSaving ? 'Saving...' : 'Save'}
             </button>
           </div>

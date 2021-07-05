@@ -34,6 +34,7 @@ function Meal() {
 
   const handleSubmit = async (values, form) => {
     setIsLoading(true);
+
     try {
       if (editId) await api.patch(`/meals/${editId}`, values);
       else await api.post('/meals', values);
@@ -75,8 +76,6 @@ function Meal() {
     onSubmit: handleSubmit,
   });
 
-  console.log({ values: formik.values });
-
   const toggleModal = () => {
     if (!isLoading) {
       if (isModalOpen) formik.resetForm();
@@ -105,9 +104,14 @@ function Meal() {
   };
 
   const handleDelete = async (id) => {
-    await api.delete(`/meals/${id}`);
-    await await queryClient.invalidateQueries();
-    addToast('Meal deleted successfully', { appearance: 'success' });
+    try {
+      await api.delete(`/meals/${id}`);
+      await await queryClient.invalidateQueries();
+      addToast('Meal deleted successfully', { appearance: 'success' });
+    } catch (err) {
+      const error = error.response?.data?.message ?? err.message;
+      addToast(error, { appearance: 'error' });
+    }
   };
 
   useEffect(() => {
@@ -115,23 +119,23 @@ function Meal() {
   }, [isError]);
 
   return (
-    <div className="container-padding">
-      <div className="d-flex justify-content-between">
+    <div className='container-padding'>
+      <div className='d-flex justify-content-between'>
         <button
-          type="button"
-          className="btn btn-primary mb-2"
+          type='button'
+          className='btn btn-primary mb-2'
           onClick={toggleModal}
         >
           Add Meal
         </button>
         <input
-          placeholder="Search"
-          className="pl-2"
+          placeholder='Search'
+          className='pl-2'
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
-      <p className="text-center">{isLoadingQuery && 'Loading...'}</p>
+      <p className='text-center'>{isLoadingQuery && 'Loading...'}</p>
       <DataGrid
         columns={mealsEntity.columns}
         rows={data?.rows}

@@ -4,20 +4,20 @@ import Sidebar from './Sidebar';
 
 function Layout({ children }) {
   return (
-    <div className="wrapper d-flex align-items-stretch">
+    <div className='wrapper d-flex align-items-stretch'>
       <Sidebar />
-      <div id="content" className="p-4 p-md-5">
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
-          <div className="container-fluid">
-            <button
+      <div id='content' className='p-4 p-md-5'>
+        <nav className='navbar navbar-expand-lg navbar-light bg-light'>
+          <div className='container-fluid'>
+            {/* <button
               type="button"
               id="sidebarCollapse"
               className="btn btn-primary"
             >
               <i className="fa fa-bars" />
               <span className="sr-only">Toggle Menu</span>
-            </button>
-            <button
+            </button> */}
+            {/* <button
               className="btn btn-dark d-inline-block d-lg-none ml-auto"
               type="button"
               data-toggle="collapse"
@@ -27,9 +27,9 @@ function Layout({ children }) {
               aria-label="Toggle navigation"
             >
               <i className="fa fa-bars" />
-            </button>
+            </button> */}
 
-            <div
+            {/* <div
               className="collapse navbar-collapse"
               id="navbarSupportedContent"
             >
@@ -55,7 +55,7 @@ function Layout({ children }) {
                   </a>
                 </li>
               </ul>
-            </div>
+            </div> */}
           </div>
         </nav>
         {children}

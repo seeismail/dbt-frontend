@@ -12,7 +12,7 @@
     "react/destructuring-assignment": 1,
     "import/no-unresolved": 0,
     "prettier/prettier": [
-      "error",
+      "warn",
       {
         "trailingComma": "es5",
         "singleQuote": true,

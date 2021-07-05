@@ -35,7 +35,6 @@ export const meals = {
     { server: 'meal_id', client: 'Meal ID' },
     { server: 'meal_name', client: 'Name' },
     { server: 'price', client: 'Price' },
-    // { server: 'cheff_id', client: 'Chef ID' },
     { client: 'Manage' },
   ],
 };
@@ -61,9 +60,10 @@ export const currentOrder = {
 export const orders = {
   key: 'orders',
   columns: [
-    { server: 'oId', client: 'Order ID' },
-    { server: 'quantity', client: 'Quantity' },
-    { server: 'status', client: 'Status' },
-    { server: 'time', client: 'Time' },
+    { server: 'order_id', client: 'Order ID' },
+    { server: 'waiter_id', client: 'Waiter' },
+    { server: 'cust_id', client: 'Customer' },
+    { server: 'total_amount', client: 'Total' },
+    { server: 'order_time', client: 'Registered On' },
   ],
 };

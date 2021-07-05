@@ -8,27 +8,12 @@ import dayjs from 'dayjs';
 
 import { useToasts } from 'react-toast-notifications';
 import { useQuery, useQueryClient } from 'react-query';
+import { useHistory } from 'react-router-dom';
 import DataGrid from '../../components/DataGrid';
 import { customers as customersEntity } from '../../constants/entities';
 import { customerSchema } from '../../constants/schema';
 import Modal from './Modal';
-import { api, fetchWaiters } from '../../constants/server';
-
-const fetchRows = (page, limit, query) =>
-  api
-    .get('/customers', {
-      params: { limit, page, q: query },
-    })
-    .then((result) =>
-      // debugger;
-      ({
-        ...result.data,
-        rows: result.data.rows.map((row) => {
-          const parsedDate = dayjs(row.hire_date).format('DD MMM YYYY');
-          return { ...row, hire_date: parsedDate };
-        }),
-      })
-    );
+import { api, fetchCustomers, fetchWaiters } from '../../constants/server';
 
 function Waiters() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,6 +22,7 @@ function Waiters() {
   const { addToast } = useToasts();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
+  const history = useHistory();
 
   const queryClient = useQueryClient();
 
@@ -44,7 +30,7 @@ function Waiters() {
 
   const { data, isLoading: isLoadingQuery, isError, error } = useQuery(
     ['customers', page, limit, query],
-    () => fetchRows(page, limit, query),
+    () => fetchCustomers(page, limit, query),
     { retry: false }
   );
 
@@ -60,6 +46,11 @@ function Waiters() {
 
       form.resetForm();
       toggleModal();
+
+      if (!editId) {
+        console.log('pushing');
+        history.push('/orders');
+      }
 
       addToast('Customer dispatched succesfully', { appearance: 'success' });
     } catch (err) {
@@ -114,9 +105,14 @@ function Waiters() {
   };
 
   const handleDelete = async (id) => {
-    await api.delete(`/customers/${id}`);
-    await await queryClient.invalidateQueries();
-    addToast('Customer deleted successfully', { appearance: 'success' });
+    try {
+      await api.delete(`/customers/${id}`);
+      await await queryClient.invalidateQueries();
+      addToast('Customer deleted successfully', { appearance: 'success' });
+    } catch (err) {
+      const error = error.response?.data?.message ?? err.message;
+      addToast(error, { appearance: 'error' });
+    }
   };
 
   useEffect(() => {
@@ -124,23 +120,23 @@ function Waiters() {
   }, [isError]);
 
   return (
-    <div className="container-padding">
-      <div className="d-flex justify-content-between">
+    <div className='container-padding'>
+      <div className='d-flex justify-content-between'>
         <button
-          type="button"
-          className="btn btn-primary mb-2"
+          type='button'
+          className='btn btn-primary mb-2'
           onClick={toggleModal}
         >
           Add Customer
         </button>
         <input
-          placeholder="Search"
-          className="pl-2"
+          placeholder='Search'
+          className='pl-2'
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
-      <p className="text-center">{isLoadingQuery && 'Loading...'}</p>
+      <p className='text-center'>{isLoadingQuery && 'Loading...'}</p>
       <DataGrid
         columns={customersEntity.columns}
         rows={data?.rows}

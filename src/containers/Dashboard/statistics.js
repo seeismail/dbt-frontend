@@ -1,109 +1,56 @@
+import dayjs from 'dayjs';
 import React from 'react';
+import { useQuery } from 'react-query';
+import { useHistory } from 'react-router-dom';
+import { api } from '../../constants/server';
+
+const StatisticCard = ({ title, children }) => (
+  <div className='col-xl-3 col-lg-6'>
+    <div className='card card-stats mb-4 mb-xl-0'>
+      <div className='card-body'>
+        <div className='row'>
+          <div className='col'>
+            <h5 className='card-title text-uppercase text-muted mb-0'>
+              {title}
+            </h5>
+            <span className='h2 font-weight-bold mb-0'>{children}</span>
+          </div>
+        </div>
+        {/* <p className='mt-3 mb-0 text-muted text-sm'></p> */}
+      </div>
+    </div>
+  </div>
+);
+
+const today = dayjs(new Date()).format('DD MMM YYYY');
 
 function Statistics() {
+  const ordersCount = useQuery('ordersCount', () =>
+    api.get('/orders/count').then((res) => res.data)
+  );
+  const customersCount = useQuery('customersCount', () =>
+    api.get('/customers/count').then((res) => res.data)
+  );
+  const history = useHistory();
   return (
-    <div>
-      <div className="row">
-        <div className="col-xl-3 col-lg-6">
-          <div className="card card-stats mb-4 mb-xl-0">
-            <div className="card-body">
-              <div className="row">
-                <div className="col">
-                  <h5 className="card-title text-uppercase text-muted mb-0">
-                    Traffic
-                  </h5>
-                  <span className="h2 font-weight-bold mb-0">350,897</span>
-                </div>
-                <div className="col-auto">
-                  <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
-                    <i className="fas fa-chart-bar" />
-                  </div>
-                </div>
-              </div>
-              <p className="mt-3 mb-0 text-muted text-sm">
-                <span className="text-success mr-2">
-                  <i className="fa fa-arrow-up" /> 3.48%
-                </span>
-                <span className="text-nowrap">Since last month</span>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="col-xl-3 col-lg-6">
-          <div className="card card-stats mb-4 mb-xl-0">
-            <div className="card-body">
-              <div className="row">
-                <div className="col">
-                  <h5 className="card-title text-uppercase text-muted mb-0">
-                    New users
-                  </h5>
-                  <span className="h2 font-weight-bold mb-0">2,356</span>
-                </div>
-                <div className="col-auto">
-                  <div className="icon icon-shape bg-warning text-white rounded-circle shadow">
-                    <i className="fas fa-chart-pie" />
-                  </div>
-                </div>
-              </div>
-              <p className="mt-3 mb-0 text-muted text-sm">
-                <span className="text-danger mr-2">
-                  <i className="fas fa-arrow-down" /> 3.48%
-                </span>
-                <span className="text-nowrap">Since last week</span>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="col-xl-3 col-lg-6">
-          <div className="card card-stats mb-4 mb-xl-0">
-            <div className="card-body">
-              <div className="row">
-                <div className="col">
-                  <h5 className="card-title text-uppercase text-muted mb-0">
-                    Sales
-                  </h5>
-                  <span className="h2 font-weight-bold mb-0">924</span>
-                </div>
-                <div className="col-auto">
-                  <div className="icon icon-shape bg-yellow text-white rounded-circle shadow">
-                    <i className="fas fa-users" />
-                  </div>
-                </div>
-              </div>
-              <p className="mt-3 mb-0 text-muted text-sm">
-                <span className="text-warning mr-2">
-                  <i className="fas fa-arrow-down" /> 1.10%
-                </span>
-                <span className="text-nowrap">Since yesterday</span>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="col-xl-3 col-lg-6">
-          <div className="card card-stats mb-4 mb-xl-0">
-            <div className="card-body">
-              <div className="row">
-                <div className="col">
-                  <h5 className="card-title text-uppercase text-muted mb-0">
-                    Performance
-                  </h5>
-                  <span className="h2 font-weight-bold mb-0">49,65%</span>
-                </div>
-                <div className="col-auto">
-                  <div className="icon icon-shape bg-info text-white rounded-circle shadow">
-                    <i className="fas fa-percent" />
-                  </div>
-                </div>
-              </div>
-              <p className="mt-3 mb-0 text-muted text-sm">
-                <span className="text-success mr-2">
-                  <i className="fas fa-arrow-up" /> 12%
-                </span>
-                <span className="text-nowrap">Since last month</span>
-              </p>
-            </div>
-          </div>
-        </div>
+    <div className='mb-3'>
+      <div className='row'>
+        <StatisticCard title='New Customer'>
+          <button
+            type='button'
+            className='btn btn-primary'
+            onClick={() => history.push('/contacts/customers')}
+          >
+            Create
+          </button>
+        </StatisticCard>
+        <StatisticCard title='Sales'>
+          {ordersCount.data?.count ?? '...'}
+        </StatisticCard>
+        <StatisticCard title='Customers Served'>
+          {customersCount.data?.count ?? '...'}
+        </StatisticCard>
+        <StatisticCard title='Date & Time'>{today}</StatisticCard>
       </div>
     </div>
   );
